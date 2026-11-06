@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SELECT AIOS デモ - SatoTech</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:"Hiragino Kaku Gothic ProN","Yu Gothic",Meiryo,Arial,sans-serif;background:#e9efec;color:#1e2b27}
+  .barra{background:#111;color:#fff;padding:9px 16px;font-size:12.5px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:6px}
+  .barra b{color:#8fe0c6}
+  .app{max-width:1180px;margin:14px auto 40px;background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 14px 44px rgba(10,40,32,.16)}
+  .topo{background:#0c4a37;color:#fff;padding:14px 20px;display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+  .topo img.logo{height:44px;border-radius:4px;background:#fff}
+  .topo .titulo{font-size:17px;font-weight:900}
+  .topo .titulo small{display:block;font-size:11.5px;font-weight:600;color:#bfe3d5}
+  .idioma{margin-left:auto;display:flex;gap:6px}
+  .idioma button{border:1.5px solid #ffe600;background:transparent;color:#ffe600;border-radius:999px;padding:7px 14px;font-weight:800;cursor:pointer;font-size:12.5px}
+  .idioma button.ativo{background:#ffe600;color:#20301f}
+  .menu{display:flex;gap:7px;padding:13px 16px 0;flex-wrap:wrap}
+  .menu button{border:1.5px solid #cfe0da;background:#fff;border-radius:999px;padding:9px 15px;font-size:13.5px;font-weight:700;cursor:pointer;color:#22332e}
+  .menu button.ativo{background:#29a279;border-color:#29a279;color:#fff}
+  .tela{display:none;padding:22px}
+  .tela.ativa{display:block}
+  h2{font-size:20px;margin-bottom:6px}
+  .sub{font-size:13px;color:#5a6b64;line-height:1.75;margin-bottom:18px}
+  .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:20px}
+  .kpi{border-radius:12px;padding:17px;color:#fff}
+  .kpi b{display:block;font-size:26px}
+  .kpi span{font-size:12px;line-height:1.5;display:block}
+  .grade2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  @media(max-width:800px){.grade2{grid-template-columns:1fr}}
+  .caixa{border:1px solid #dfe9e4;border-radius:12px;padding:18px}
+  .caixa h3{font-size:15px;margin-bottom:12px;color:#0c4a37}
+  .funil div{display:flex;justify-content:space-between;font-size:13px;padding:8px 0;border-bottom:1px dashed #dfe9e4}
+  .funil b{color:#17785a}
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  th,td{border-bottom:1px solid #e4ece8;padding:10px 8px;text-align:left;vertical-align:top}
+  th{color:#17785a;font-size:11.5px;white-space:nowrap}
+  .status{font-size:11px;border-radius:999px;padding:3px 9px;font-weight:800;white-space:nowrap}
+  .s-novo{background:#e8f2ff;color:#1756a9}.s-entrevista{background:#fff3c4;color:#7a5c00}.s-apresentando{background:#fde8ff;color:#8a2a96}
+  .s-visita{background:#ffe9d6;color:#9a5200}.s-decidido{background:#dff5ea;color:#17785a}.s-trabalhando{background:#29a279;color:#fff}
+  .s-aberta{background:#dff5ea;color:#17785a}.s-fechada{background:#ececec;color:#666}
+  .alerta{border-radius:9px;padding:13px 16px;margin-bottom:10px;font-size:13.5px;line-height:1.7;display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap}
+  .a-vermelho{background:#fdeeee;border:1px solid #f0bcbc}.a-amarelo{background:#fff8da;border:1px solid #ecd98f}.a-verde{background:#e9f7f1;border:1px solid #bfe6d5}
+  .tag{font-size:11px;background:#eef4f1;border-radius:999px;padding:3px 9px;font-weight:800;color:#40534c;white-space:nowrap;height:fit-content}
+  .busca{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+  .busca input,.busca select{padding:11px;border:1px solid #cfdcd6;border-radius:9px;font-size:13.5px}
+  .busca input{flex:1;min-width:180px}
+  .btn{background:#29a279;color:#fff;border:none;border-radius:9px;padding:11px 18px;font-weight:800;cursor:pointer;font-size:13.5px}
+  .btn:hover{filter:brightness(1.07)}
+  .btn-escuro{background:#0c4a37}
+  form.cadastro{display:none;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:11px;border:1.5px solid #29a279;border-radius:12px;padding:18px;margin-bottom:16px;background:#f4faf7}
+  form.cadastro.aberto{display:grid}
+  form.cadastro input,form.cadastro select{padding:11px;border:1px solid #cfdcd6;border-radius:9px;font-size:13.5px;width:100%}
+  form.cadastro .linha{grid-column:1/-1;font-size:14px;font-weight:900;color:#0c4a37}
+  .ok{display:none;background:#e9f7f1;border:1px solid #a9dccd;color:#17785a;border-radius:9px;padding:12px 15px;font-size:13px;font-weight:700;margin-bottom:14px}
+  .rodape{padding:0 22px 22px;font-size:11.5px;color:#5a6b64;line-height:1.8}
+  .cartao-vaga{border:1px solid #dfe9e4;border-left:6px solid #29a279;border-radius:10px;padding:15px 17px;margin-bottom:11px}
+  .cartao-vaga b{font-size:14.5px}
+  .cartao-vaga p{font-size:12.5px;color:#5a6b64;line-height:1.7;margin-top:4px}
+  .prog{height:8px;background:#e4ece8;border-radius:99px;margin-top:9px;overflow:hidden}
+  .prog i{display:block;height:100%;background:#29a279}
+
+  /* v2 premium: barra lateral, grafico, kanban, ficha */
+  :root{--vd:#0c4a37;--v:#29a279;--am:#ffe600}
+  .app{display:grid;grid-template-columns:232px 1fr;grid-template-rows:auto 1fr auto;max-width:1240px}
+  .topo{grid-column:1;grid-row:1;flex-direction:column;align-items:flex-start;gap:14px;padding:22px 18px 8px;border-bottom:none}
+  .topo img.logo{height:52px}
+  .topo .idioma{margin-left:0}
+  .menu{grid-column:1;grid-row:2;background:var(--vd);flex-direction:column;align-items:stretch;padding:10px 12px 22px;gap:5px;align-content:start}
+  .menu button{border:none;background:transparent;color:#cfe2da;text-align:left;border-radius:8px;padding:12px 13px;font-size:13.5px}
+  .menu button:hover{background:rgba(255,255,255,.09);color:#fff}
+  .menu button.ativo{background:var(--v);color:#fff}
+  .tela{grid-column:2;grid-row:1/span 3;padding:28px 30px}
+  .rodape{grid-column:2;padding:0 30px 24px}
+  .kpi{border-radius:6px;box-shadow:none}
+  .caixa{border-radius:8px}
+  th{letter-spacing:.05em;text-transform:none}
+  @media(max-width:860px){.app{display:block}.topo{flex-direction:row;align-items:center}.menu{flex-direction:row;background:#fff;padding:13px 16px 0}.menu button{border:1.5px solid #cfe0da;color:#22332e;text-align:center}.menu button.ativo{background:var(--v);color:#fff}.tela{padding:22px}}
+  .grafico{display:flex;align-items:flex-end;gap:14px;height:150px;padding:10px 6px 0}
+  .grafico .col{flex:1;display:flex;flex-direction:column;align-items:center;gap:8px;height:100%;justify-content:flex-end}
+  .grafico .barra{width:70%;max-width:44px;background:var(--v);border-radius:4px 4px 0 0;position:relative}
+  .grafico .barra.destaque{background:var(--vd)}
+  .grafico .barra b{position:absolute;top:-22px;left:0;right:0;text-align:center;font-size:12.5px;color:var(--vd)}
+  .grafico .mes{font-size:11.5px;color:#5a6b64}
+  .kanban{display:grid;grid-template-columns:repeat(5,1fr);gap:11px;overflow-x:auto;padding-bottom:8px}
+  @media(max-width:1000px){.kanban{grid-template-columns:repeat(5,190px)}}
+  .coluna{background:#f2f6f3;border:1px solid #e0eae4;border-radius:10px;padding:11px;min-height:220px}
+  .coluna h4{font-size:12.5px;color:var(--vd);margin-bottom:4px;letter-spacing:.03em}
+  .coluna .qtd{font-size:11px;color:#7a8a83;margin-bottom:10px;display:block}
+  .card-k{background:#fff;border:1px solid #dfe9e4;border-left:4px solid var(--v);border-radius:8px;padding:11px 12px;margin-bottom:9px;cursor:grab;box-shadow:0 2px 6px rgba(12,50,38,.06)}
+  .card-k b{font-size:13px;display:block}
+  .card-k span{font-size:11.5px;color:#5a6b64;display:block;margin-top:4px;line-height:1.6}
+  .card-k .cod{font-size:10.5px;color:#93a69d;letter-spacing:.06em}
+  tr.clicavel{cursor:pointer}
+  tr.clicavel:hover td{background:#f2f8f5}
+  .ficha-fundo{display:none;position:fixed;inset:0;background:rgba(10,30,24,.45);z-index:90}
+  .ficha-fundo.aberta{display:block}
+  .ficha{position:fixed;top:0;right:0;width:min(400px,94vw);height:100%;background:#fff;z-index:95;box-shadow:-14px 0 40px rgba(0,0,0,.22);padding:24px;overflow-y:auto}
+  .ficha h3{font-size:18px;margin-bottom:2px}
+  .ficha .cod{font-size:11.5px;color:#7a8a83;letter-spacing:.08em;margin-bottom:16px}
+  .ficha .campo{margin-bottom:13px}
+  .ficha .campo small{display:block;font-size:10.5px;color:#7a8a83;letter-spacing:.1em;margin-bottom:3px;font-weight:700}
+  .ficha .campo span{font-size:14px}
+  .doc{display:flex;justify-content:space-between;font-size:13.5px;padding:9px 0;border-bottom:1px dashed #dfe9e4}
+  .doc .ok-s{color:#17785a;font-weight:800}
+  .doc .pend{color:#b8860b;font-weight:800}
+  .fechar{float:right;background:none;border:1px solid #cfe0da;border-radius:8px;padding:7px 13px;cursor:pointer;font-weight:700}
+
+  /* v3: tarefas, feed, publicar, toast, busca global */
+  .tarefas label{display:flex;gap:10px;font-size:13.5px;padding:9px 0;border-bottom:1px dashed #dfe9e4;cursor:pointer;align-items:flex-start;line-height:1.7}
+  .tarefas label:last-child{border-bottom:none}
+  .tarefas input{margin-top:4px;accent-color:#29a279;width:16px;height:16px;flex:none}
+  .tarefas input:checked + span{text-decoration:line-through;color:#93a69d}
+  .feed-item{display:flex;justify-content:space-between;gap:10px;font-size:13px;padding:9px 0;border-bottom:1px dashed #dfe9e4;line-height:1.7}
+  .feed-item:last-child{border-bottom:none}
+  .tempo{color:#93a69d;font-size:11.5px;white-space:nowrap}
+  .pub-btn{margin-left:10px;border:1.5px solid #29a279;background:#eafaf3;color:#17785a;border-radius:999px;padding:5px 12px;font-size:11.5px;font-weight:800;cursor:pointer}
+  .pub-btn.off{border-color:#c9d4cf;background:#f2f2f2;color:#777}
+  #toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(20px);background:#0c4a37;color:#fff;padding:14px 22px;border-radius:10px;font-size:14px;font-weight:700;opacity:0;pointer-events:none;transition:.3s;z-index:300;box-shadow:0 12px 30px rgba(0,0,0,.25);max-width:92vw;text-align:center}
+  #toast.mostra{opacity:1;transform:translateX(-50%) translateY(0)}
+  .busca-global{width:100%;margin-top:12px;padding:11px;border:none;border-radius:8px;font-size:13px}
+  .sim-box{display:flex;justify-content:space-between;gap:14px;align-items:center;flex-wrap:wrap;border:1.5px solid #29a279;background:#f4faf7;border-radius:12px;padding:18px;margin-bottom:16px}
+  .sim-box p{font-size:13.5px;line-height:1.8;max-width:640px}
+.card-k .mover{display:flex;gap:6px;margin-top:9px}
+.card-k .mover button{flex:1;background:#eef4f1;border:1px solid #dfe5e1;color:#0d4a36;font-size:15px;padding:5px 0;cursor:pointer}
+</style>
+
+<style>
+/* Correcoes mobile 06/11/2026: tabelas rolam de lado em vez de espremer */
+@media(max-width:700px){
+ table{display:block;overflow-x:auto;-webkit-overflow-scrolling:touch}
+ th,td{white-space:nowrap}
+}
+</style>
+</head>
+<body>
+
+<div class="barra"><div><b>SatoTech</b> <span data-jp="AIOSデモ（人材管理システム）: 派遣会社の業務イメージ。全データは架空のサンプルです。" data-pt="AIOS de demonstração (sistema de gestão) para empreiteira. Todos os dados são fictícios.">AIOSデモ（人材管理システム）: 派遣会社の業務イメージ。全データは架空のサンプルです。</span></div><div>Minoru Sato, 28/10/2026 &nbsp;|&nbsp; <a href="https://smsato80.github.io/select-amostra-site/" style="color:#fff;font-weight:700">← サイト案に戻る</a></div></div>
+
+<div class="app">
+  <div class="topo">
+    <img class="logo" src="data:image/gif;base64,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" alt="SELECT">
+    <div class="titulo"><span data-jp="人材管理システム (デモ)" data-pt="Sistema de gestão de pessoas (demo)">人材管理システム (デモ)</span><small>SELECT CORPORATION / 株式会社セレクト</small></div>
+    <input class="busca-global" id="busca-global" placeholder="検索 / Buscar candidato" onkeydown="if(event.key==='Enter'){buscarGlobal()}">
+    <div class="idioma">
+      <button id="lang-jp" class="ativo" onclick="setLang('jp')">日本語</button>
+      <button id="lang-pt" onclick="setLang('pt')">Português</button>
+    </div>
+  </div>
+
+  <div class="menu">
+    <button class="ativo" data-tela="dash" onclick="aba('dash',this)" data-jp="ダッシュボード" data-pt="Painel">ダッシュボード</button>
+    <button data-tela="cand" onclick="aba('cand',this)" data-jp="候補者 (登録)" data-pt="Candidatos (cadastro)">候補者 (登録)</button>
+    <button data-tela="vagas" onclick="aba('vagas',this)" data-jp="求人" data-pt="Vagas">求人</button>
+    <button data-tela="emp" onclick="aba('emp',this)" data-jp="派遣先企業" data-pt="Empresas clientes">派遣先企業</button>
+    <button data-tela="aloc" onclick="aba('aloc',this)" data-jp="就業中" data-pt="Em trabalho">就業中</button>
+    <button data-tela="kanban" onclick="aba('kanban',this)" data-jp="カンバン" data-pt="Kanban">カンバン</button>
+    <button data-tela="alertas" onclick="aba('alertas',this)" data-jp="アラート" data-pt="Alertas">アラート</button>
+  </div>
+
+  <!-- DASH -->
+  <section class="tela ativa" id="tela-dash">
+    <h2 data-jp="今日の全体像" data-pt="Visão de hoje">今日の全体像</h2>
+    <p class="sub" data-jp="朝にこの画面を開くだけで、候補者、求人、期限の状況が分かります。数字は全てサンプルです。" data-pt="Ao abrir esta tela de manhã, dá para ver candidatos, vagas e prazos de uma vez. Todos os números são de exemplo.">朝にこの画面を開くだけで、候補者、求人、期限の状況が分かります。数字は全てサンプルです。</p>
+    <div class="kpis">
+      <div class="kpi" style="background:#29a279"><b id="kpi-cand">128</b><span data-jp="登録候補者 (サンプル)" data-pt="Candidatos cadastrados (exemplo)">登録候補者 (サンプル)</span></div>
+      <div class="kpi" style="background:#0c4a37"><b>86</b><span data-jp="就業中スタッフ (サンプル)" data-pt="Trabalhando agora (exemplo)">就業中スタッフ (サンプル)</span></div>
+      <div class="kpi" style="background:#b8860b"><b>14</b><span data-jp="募集中の求人 (サンプル)" data-pt="Vagas abertas (exemplo)">募集中の求人 (サンプル)</span></div>
+      <div class="kpi" style="background:#c0392b"><b>5</b><span data-jp="30日以内の期限アラート" data-pt="Alertas de prazo em 30 dias">30日以内の期限アラート</span></div>
+    </div>
+    
+    <div class="caixa" style="margin-bottom:16px">
+      <h3 data-jp="月ごとの就業決定 (サンプル)" data-pt="Decisões por mês (exemplo)">月ごとの就業決定 (サンプル)</h3>
+      <div class="grafico">
+        <div class="col"><div class="barra" style="height:52%"><b>5</b></div><span class="mes" data-jp="5月" data-pt="Mai">5月</span></div>
+        <div class="col"><div class="barra" style="height:72%"><b>7</b></div><span class="mes" data-jp="6月" data-pt="Jun">6月</span></div>
+        <div class="col"><div class="barra" style="height:62%"><b>6</b></div><span class="mes" data-jp="7月" data-pt="Jul">7月</span></div>
+        <div class="col"><div class="barra" style="height:92%"><b>9</b></div><span class="mes" data-jp="8月" data-pt="Ago">8月</span></div>
+        <div class="col"><div class="barra" style="height:82%"><b>8</b></div><span class="mes" data-jp="9月" data-pt="Set">9月</span></div>
+        <div class="col"><div class="barra destaque" style="height:92%"><b>9</b></div><span class="mes" data-jp="10月" data-pt="Out">10月</span></div>
+      </div>
+    </div>
+<div class="grade2">
+      <div class="caixa">
+        <h3 data-jp="候補者の進み具合" data-pt="Funil de candidatos">候補者の進み具合</h3>
+        <div class="funil">
+          <div><span data-jp="新規登録" data-pt="Cadastro novo">新規登録</span><b>18</b></div>
+          <div><span data-jp="面談済み" data-pt="Entrevistado">面談済み</span><b>24</b></div>
+          <div><span data-jp="企業へ紹介中" data-pt="Apresentado a empresa">企業へ紹介中</span><b>31</b></div>
+          <div><span data-jp="職場見学" data-pt="Visita ao local">職場見学</span><b>12</b></div>
+          <div><span data-jp="就業決定" data-pt="Decidido neste mês">就業決定</span><b>9</b></div>
+          <div style="border-bottom:none"><span data-jp="就業中" data-pt="Trabalhando">就業中</span><b>86</b></div>
+        </div>
+      </div>
+      <div class="caixa">
+        <h3 data-jp="直近のアラート" data-pt="Alertas próximos">直近のアラート</h3>
+        <div class="alerta a-vermelho"><span><b data-jp="在留期限" data-pt="Visto">在留期限</b> <span data-jp="Carlos Silva まで12日" data-pt="Carlos Silva: faltam 12 dias">Carlos Silva まで12日</span></span><span class="tag" data-jp="要対応" data-pt="Urgente">要対応</span></div>
+        <div class="alerta a-amarelo"><span><b data-jp="健康診断" data-pt="Exame de saúde">健康診断</b> <span data-jp="未受診 5名 (サンプル)" data-pt="5 pessoas pendentes (exemplo)">未受診 5名 (サンプル)</span></span><span class="tag" data-jp="今月中" data-pt="Este mês">今月中</span></div>
+        <div class="alerta a-amarelo"><span><b data-jp="求人の空き" data-pt="Vaga aberta">求人の空き</b> <span data-jp="A社 組立 3名不足 (サンプル)" data-pt="Empresa A, montagem: faltam 3 (exemplo)">A社 組立 3名不足 (サンプル)</span></span><span class="tag" data-jp="募集中" data-pt="Aberta">募集中</span></div>
+      </div>
+    </div>
+  
+    <div class="sim-box">
+      <p data-jp="サイトとの連動: サイトのフォームから応募が入ると、この管理画面にそのまま届きます。右のボタンで、今すぐ動きを試せます。" data-pt="Ligação com o site: quando uma pessoa se inscreve pelo formulário do site, ela cai direto neste painel. Teste o movimento agora no botão ao lado.">サイトとの連動: サイトのフォームから応募が入ると、この管理画面にそのまま届きます。右のボタンで、今すぐ動きを試せます。</p>
+      <button class="btn" onclick="simularAplicacao()" data-jp="試す: サイトからの応募" data-pt="Testar: inscrição pelo site">試す: サイトからの応募</button>
+    </div>
+    <div class="grade2">
+      <div class="caixa tarefas">
+        <h3 data-jp="今日のタスク" data-pt="Tarefas de hoje">今日のタスク</h3>
+        <label><input type="checkbox"><span data-jp="在留更新の書類を確認 (Carlos Silva)" data-pt="Conferir os documentos da renovação do visto (Carlos Silva)">在留更新の書類を確認 (Carlos Silva)</span></label>
+        <label><input type="checkbox"><span data-jp="B社へ見学の日程を連絡する" data-pt="Avisar a Empresa B sobre a data da visita">B社へ見学の日程を連絡する</span></label>
+        <label><input type="checkbox"><span data-jp="新しい求人の原稿を確認する" data-pt="Revisar o texto da vaga nova">新しい求人の原稿を確認する</span></label>
+        <label><input type="checkbox"><span data-jp="D社向けに制服 (L) を準備する" data-pt="Preparar o uniforme (L) para a Empresa D">D社向けに制服 (L) を準備する</span></label>
+      </div>
+      <div class="caixa">
+        <h3 data-jp="新着" data-pt="Novidades">新着</h3>
+        <div id="feed">
+          <div class="feed-item"><span data-jp="サイトから応募: Lucas Oliveira (静岡県希望)" data-pt="Inscrição pelo site: Lucas Oliveira (quer Shizuoka)">サイトから応募: Lucas Oliveira (静岡県希望)</span><span class="tempo">09:12</span></div>
+          <div class="feed-item"><span data-jp="A社から追加の依頼: 2名" data-pt="Empresa A pediu mais 2 pessoas">A社から追加の依頼: 2名</span><span class="tempo" data-jp="昨日" data-pt="Ontem">昨日</span></div>
+          <div class="feed-item"><span data-jp="面談が決まりました: Ana Reyes" data-pt="Entrevista marcada: Ana Reyes">面談が決まりました: Ana Reyes</span><span class="tempo" data-jp="昨日" data-pt="Ontem">昨日</span></div>
+        </div>
+      </div>
+    </div>
+</section>
+
+  <!-- CANDIDATOS -->
+  <section class="tela" id="tela-cand">
+    <h2 data-jp="候補者の登録と管理" data-pt="Cadastro e gestão de candidatos">候補者の登録と管理</h2>
+    <p class="sub" data-jp="サイトの応募フォームから入った人も、電話や紹介で来た人も、ここに一本化します。コードか名前で検索できます。下のボタンから新規登録の動きも試せます (このデモでは画面上だけに保存されます)。" data-pt="Quem entra pelo formulário do site, por telefone ou por indicação fica no mesmo lugar. Busca por código ou nome. O botão abaixo mostra como é cadastrar (nesta demo, salva só na tela).">サイトの応募フォームから入った人も、電話や紹介で来た人も、ここに一本化します。コードか名前で検索できます。下のボタンから新規登録の動きも試せます (このデモでは画面上だけに保存されます)。</p>
+    <div class="busca">
+      <input id="busca-cand" type="text" placeholder="コード / 名前で検索 (ex. KELO55)" oninput="filtrarCand()">
+      <select id="filtro-status" onchange="filtrarCand()">
+        <option value="" data-jp="全ステータス" data-pt="Todos os status">全ステータス</option><option value="新規" data-jp="新規" data-pt="Novo">新規</option><option value="面談" data-jp="面談" data-pt="Entrevista">面談</option><option value="紹介中" data-jp="紹介中" data-pt="Apresentado">紹介中</option><option value="見学" data-jp="見学" data-pt="Visita">見学</option><option value="決定" data-jp="決定" data-pt="Decidido">決定</option><option value="就業中" data-jp="就業中" data-pt="Trabalhando">就業中</option>
+      </select>
+      <button class="btn" onclick="document.getElementById('form-cand').classList.toggle('aberto')" data-jp="+ 新規登録" data-pt="+ Novo cadastro">+ 新規登録</button>
+    </div>
+    <form class="cadastro" id="form-cand" onsubmit="return addCand(event)">
+      <div class="linha" data-jp="新規登録フォーム (デモ)" data-pt="Formulário de cadastro (demo)">新規登録フォーム (デモ)</div>
+      <input id="f-nome" required placeholder="名前 / Nome">
+      <input id="f-tel" placeholder="電話 / Telefone">
+      <select id="f-nac"><option data-jp="ブラジル" data-pt="Brasil">ブラジル</option><option data-jp="日本" data-pt="Japão">日本</option><option data-jp="ペルー" data-pt="Peru">ペルー</option><option data-jp="フィリピン" data-pt="Filipinas">フィリピン</option><option data-jp="ベトナム" data-pt="Vietnã">ベトナム</option><option data-jp="その他" data-pt="Outro">その他</option></select>
+      <select id="f-area"><option data-jp="愛知県" data-pt="Aichi">愛知県</option><option data-jp="静岡県" data-pt="Shizuoka">静岡県</option><option data-jp="三重県" data-pt="Mie">三重県</option></select>
+      <select id="f-turno"><option data-jp="日勤のみ" data-pt="Só turno do dia">日勤のみ</option><option data-jp="交替OK" data-pt="Turnos alternados">交替OK</option><option data-jp="夜勤OK" data-pt="Turno da noite">夜勤OK</option></select>
+      <select id="f-jp"><option data-jp="日本語: 日常会話" data-pt="Japonês: conversa do dia a dia">日本語: 日常会話</option><option data-jp="日本語: 簡単な会話" data-pt="Japonês: conversa simples">日本語: 簡単な会話</option><option data-jp="日本語: 流暢" data-pt="Japonês: fluente">日本語: 流暢</option><option data-jp="日本語: ほぼ不可" data-pt="Japonês: quase nada">日本語: ほぼ不可</option></select>
+      <button class="btn btn-escuro" type="submit" data-jp="登録する" data-pt="Cadastrar">登録する</button>
+    </form>
+    <div class="ok" id="ok-cand">登録しました (デモ)。本番ではこの内容がそのまま一覧と検索に入ります。</div>
+    <div style="overflow-x:auto">
+    <table id="tab-cand">
+      <tr><th data-jp="コード" data-pt="Código">コード</th><th data-jp="名前" data-pt="Nome">名前</th><th data-jp="国籍 / 言語" data-pt="Nacionalidade">国籍 / 言語</th><th data-jp="希望" data-pt="Preferência">希望</th><th data-jp="日本語" data-pt="Japonês">日本語</th><th data-jp="在留期限" data-pt="Visto até">在留期限</th><th>ステータス</th><th data-jp="経路" data-pt="Origem">経路</th></tr>
+      <tr class="clicavel" onclick="abrirFicha('KELO55','Carlos Silva')"><td>KELO55</td><td>Carlos Silva</td><td data-jp="ブラジル / ポルトガル語" data-pt="Brasil / Português">ブラジル / ポルトガル語</td><td data-jp="愛知県 / 日勤" data-pt="Aichi / Turno do dia">愛知県 / 日勤</td><td data-jp="日常会話" data-pt="Conversa do dia a dia">日常会話</td><td><b style="color:#c0392b" data-jp="12日" data-pt="12 dias">12日</b></td><td><span class="status s-trabalhando" data-jp="就業中" data-pt="Trabalhando">就業中</span></td><td data-jp="サイト" data-pt="Site">サイト</td></tr>
+      <tr class="clicavel" onclick="abrirFicha('DEMO102','Maria Flores')"><td>DEMO102</td><td>Maria Flores</td><td data-jp="ペルー / スペイン語" data-pt="Peru / Espanhol">ペルー / スペイン語</td><td data-jp="静岡県 / 交替OK" data-pt="Shizuoka / Turnos alternados">静岡県 / 交替OK</td><td data-jp="簡単な会話" data-pt="Conversa simples">簡単な会話</td><td data-jp="8ヶ月" data-pt="8 meses">8ヶ月</td><td><span class="status s-apresentando" data-jp="紹介中" data-pt="Apresentado">紹介中</span></td><td data-jp="紹介" data-pt="Indicação">紹介</td></tr>
+      <tr class="clicavel" onclick="abrirFicha('DEMO207','Kenji Tanaka')"><td>DEMO207</td><td>Kenji Tanaka</td><td data-jp="日本 / 日本語" data-pt="Japão / Japonês">日本 / 日本語</td><td data-jp="愛知県 / 日勤" data-pt="Aichi / Turno do dia">愛知県 / 日勤</td><td data-jp="流暢" data-pt="Fluente">流暢</td><td>-</td><td><span class="status s-visita" data-jp="見学" data-pt="Visita">見学</span></td><td data-jp="電話" data-pt="Telefone">電話</td></tr>
+      <tr class="clicavel" onclick="abrirFicha('DEMO311','Ana Reyes')"><td>DEMO311</td><td>Ana Reyes</td><td data-jp="フィリピン / 英語" data-pt="Filipinas / Inglês">フィリピン / 英語</td><td data-jp="三重県 / 夜勤OK" data-pt="Mie / Turno da noite">三重県 / 夜勤OK</td><td data-jp="日常会話" data-pt="Conversa do dia a dia">日常会話</td><td data-jp="5ヶ月" data-pt="5 meses">5ヶ月</td><td><span class="status s-entrevista" data-jp="面談" data-pt="Entrevista">面談</span></td><td data-jp="サイト" data-pt="Site">サイト</td></tr>
+      <tr class="clicavel" onclick="abrirFicha('DEMO415','Lucas Oliveira')"><td>DEMO415</td><td>Lucas Oliveira</td><td data-jp="ブラジル / ポルトガル語" data-pt="Brasil / Português">ブラジル / ポルトガル語</td><td data-jp="静岡県 / 交替OK / 寮希望" data-pt="Shizuoka / Turnos / Quer alojamento">静岡県 / 交替OK / 寮希望</td><td data-jp="簡単な会話" data-pt="Conversa simples">簡単な会話</td><td data-jp="11ヶ月" data-pt="11 meses">11ヶ月</td><td><span class="status s-novo" data-jp="新規" data-pt="Novo">新規</span></td><td data-jp="店頭" data-pt="Na loja">店頭</td></tr>
+      <tr class="clicavel" onclick="abrirFicha('DEMO520','Tran Van Nam')"><td>DEMO520</td><td>Tran Van Nam</td><td data-jp="ベトナム / ベトナム語" data-pt="Vietnã / Vietnamita">ベトナム / ベトナム語</td><td data-jp="愛知県 / 交替OK" data-pt="Aichi / Turnos alternados">愛知県 / 交替OK</td><td data-jp="日常会話" data-pt="Conversa do dia a dia">日常会話</td><td data-jp="3ヶ月" data-pt="3 meses">3ヶ月</td><td><span class="status s-decidido" data-jp="決定" data-pt="Decidido">決定</span></td><td data-jp="紹介" data-pt="Indicação">紹介</td></tr>
+      <tr class="clicavel" onclick="abrirFicha('DEMO601','Diego Ramos')"><td>DEMO601</td><td>Diego Ramos</td><td data-jp="ブラジル / ポルトガル語" data-pt="Brasil / Português">ブラジル / ポルトガル語</td><td data-jp="愛知県 / 日勤" data-pt="Aichi / Turno do dia">愛知県 / 日勤</td><td data-jp="簡単な会話" data-pt="Conversa simples">簡単な会話</td><td data-jp="6ヶ月" data-pt="6 meses">6ヶ月</td><td><span class="status s-novo" data-jp="新規" data-pt="Novo">新規</span></td><td data-jp="電話" data-pt="Telefone">電話</td></tr>
+    </table>
+    </div>
+  </section>
+
+  <!-- VAGAS -->
+  <section class="tela" id="tela-vagas">
+    <h2 data-jp="求人の管理" data-pt="Gestão de vagas">求人の管理</h2>
+    <p class="sub" data-jp="求人をここで直すと、サイトのお仕事情報にも同じ内容が出ます。二重入力がなくなります。進み具合も一目で分かります。" data-pt="Editou a vaga aqui, o site mostra a mesma coisa. Sem digitar duas vezes. O preenchimento aparece na barrinha.">求人をここで直すと、サイトのお仕事情報にも同じ内容が出ます。二重入力がなくなります。進み具合も一目で分かります。</p>
+    <div class="cartao-vaga"><b data-jp="自動車部品の組立" data-pt="Montagem de peças de automóvel">自動車部品の組立</b> <span class="status s-aberta" data-jp="募集中" data-pt="Aberta">募集中</span><button class="pub-btn" onclick="togglePub(this)" data-jp="サイト公開中" data-pt="Publicado no site">サイト公開中</button><p><span data-jp="派遣先: A社 (サンプル) / 愛知県安城市 / 日勤 / 時給 1,300円 (例)" data-pt="Empresa A (exemplo) / Anjo, Aichi / Turno do dia / ¥1.300 por hora (ex.)">派遣先: A社 (サンプル) / 愛知県安城市 / 日勤 / 時給 1,300円 (例)</span><br><span data-jp="募集 5名 / 決定 2名" data-pt="5 vagas / 2 preenchidas">募集 5名 / 決定 2名</span></p><div class="prog"><i style="width:40%"></i></div></div>
+    <div class="cartao-vaga"><b data-jp="自動車部品の検査" data-pt="Inspeção de peças de automóvel">自動車部品の検査</b> <span class="status s-aberta" data-jp="募集中" data-pt="Aberta">募集中</span><button class="pub-btn" onclick="togglePub(this)" data-jp="サイト公開中" data-pt="Publicado no site">サイト公開中</button><p><span data-jp="派遣先: A社 (サンプル) / 愛知県豊橋市 / 2交替 / 時給 1,400円 (例) / 寮相談可" data-pt="Empresa A (exemplo) / Toyohashi, Aichi / 2 turnos / ¥1.400 por hora (ex.) / Alojamento a consultar">派遣先: A社 (サンプル) / 愛知県豊橋市 / 2交替 / 時給 1,400円 (例) / 寮相談可</span><br><span data-jp="募集 4名 / 決定 3名" data-pt="4 vagas / 3 preenchidas">募集 4名 / 決定 3名</span></p><div class="prog"><i style="width:75%"></i></div></div>
+    <div class="cartao-vaga"><b data-jp="食品工場の製造" data-pt="Produção em fábrica de alimentos">食品工場の製造</b> <span class="status s-aberta" data-jp="募集中" data-pt="Aberta">募集中</span><button class="pub-btn" onclick="togglePub(this)" data-jp="サイト公開中" data-pt="Publicado no site">サイト公開中</button><p><span data-jp="派遣先: B社 (サンプル) / 静岡県 / 3交替 / 時給 1,250円 (例)" data-pt="Empresa B (exemplo) / Shizuoka / 3 turnos / ¥1.250 por hora (ex.)">派遣先: B社 (サンプル) / 静岡県 / 3交替 / 時給 1,250円 (例)</span><br><span data-jp="募集 6名 / 決定 1名" data-pt="6 vagas / 1 preenchida">募集 6名 / 決定 1名</span></p><div class="prog"><i style="width:17%"></i></div></div>
+    <div class="cartao-vaga"><b data-jp="フォークリフト作業" data-pt="Operador de empilhadeira">フォークリフト作業</b> <span class="status s-fechada" data-jp="募集終了" data-pt="Encerrada">募集終了</span><button class="pub-btn off" onclick="togglePub(this)" data-jp="サイト非公開" data-pt="Fora do site">サイト非公開</button><p><span data-jp="派遣先: C社 (サンプル) / 三重県 / 2交替 / 時給 1,500円 (例) / 資格必須" data-pt="Empresa C (exemplo) / Mie / 2 turnos / ¥1.500 por hora (ex.) / Habilitação obrigatória">派遣先: C社 (サンプル) / 三重県 / 2交替 / 時給 1,500円 (例) / 資格必須</span><br><span data-jp="募集 2名 / 決定 2名" data-pt="2 vagas / 2 preenchidas">募集 2名 / 決定 2名</span></p><div class="prog"><i style="width:100%"></i></div></div>
+  </section>
+
+  <!-- EMPRESAS -->
+  <section class="tela" id="tela-emp">
+    <h2 data-jp="派遣先企業の管理" data-pt="Empresas clientes">派遣先企業の管理</h2>
+    <p class="sub" data-jp="企業ごとに、依頼中の人数、担当者、就業中の人数をまとめます。電話の前にこの画面を見れば状況が分かります。" data-pt="Por empresa: pedidos abertos, contato e quantos estão trabalhando. Antes de ligar, é só olhar esta tela.">企業ごとに、依頼中の人数、担当者、就業中の人数をまとめます。電話の前にこの画面を見れば状況が分かります。</p>
+    <div style="overflow-x:auto"><table>
+      <tr><th data-jp="企業 (サンプル)" data-pt="Empresa (exemplo)">企業 (サンプル)</th><th data-jp="エリア" data-pt="Área">エリア</th><th data-jp="依頼中" data-pt="Pedidos abertos">依頼中</th><th data-jp="就業中" data-pt="Trabalhando">就業中</th><th data-jp="担当者" data-pt="Contato">担当者</th><th data-jp="次の連絡" data-pt="Próximo contato">次の連絡</th></tr>
+      <tr><td data-jp="A社 (自動車部品)" data-pt="Empresa A (peças de automóvel)">A社 (自動車部品)</td><td data-jp="安城市" data-pt="Anjo">安城市</td><td data-jp="9名" data-pt="9 pessoas">9名</td><td data-jp="34名" data-pt="34 pessoas">34名</td><td data-jp="サンプル担当者" data-pt="Contato (exemplo)">サンプル担当者</td><td data-jp="明日" data-pt="Amanhã">明日</td></tr>
+      <tr><td data-jp="B社 (食品)" data-pt="Empresa B (alimentos)">B社 (食品)</td><td data-jp="静岡県" data-pt="Shizuoka">静岡県</td><td data-jp="6名" data-pt="6 pessoas">6名</td><td data-jp="21名" data-pt="21 pessoas">21名</td><td data-jp="サンプル担当者" data-pt="Contato (exemplo)">サンプル担当者</td><td data-jp="今週中" data-pt="Esta semana">今週中</td></tr>
+      <tr><td data-jp="C社 (物流)" data-pt="Empresa C (logística)">C社 (物流)</td><td data-jp="三重県" data-pt="Mie">三重県</td><td data-jp="0名" data-pt="0">0名</td><td data-jp="12名" data-pt="12 pessoas">12名</td><td data-jp="サンプル担当者" data-pt="Contato (exemplo)">サンプル担当者</td><td data-jp="来週" data-pt="Semana que vem">来週</td></tr>
+      <tr><td data-jp="D社 (電子部品)" data-pt="Empresa D (eletrônicos)">D社 (電子部品)</td><td data-jp="豊橋市" data-pt="Toyohashi">豊橋市</td><td data-jp="3名" data-pt="3 pessoas">3名</td><td data-jp="19名" data-pt="19 pessoas">19名</td><td data-jp="サンプル担当者" data-pt="Contato (exemplo)">サンプル担当者</td><td data-jp="今日" data-pt="Hoje">今日</td></tr>
+    </table></div>
+  </section>
+
+  <!-- ALOCACOES -->
+  <section class="tela" id="tela-aloc">
+    <h2 data-jp="就業中の管理" data-pt="Quem está trabalhando">就業中の管理</h2>
+    <p class="sub" data-jp="誰が、どこの会社で、いつから働いているか。制服の貸出と寮も同じ行で見ます。" data-pt="Quem está onde, desde quando. Uniforme e alojamento na mesma linha.">誰が、どこの会社で、いつから働いているか。制服の貸出と寮も同じ行で見ます。</p>
+    <div style="overflow-x:auto"><table>
+      <tr><th data-jp="スタッフ" data-pt="Pessoa">スタッフ</th><th data-jp="派遣先" data-pt="Empresa">派遣先</th><th data-jp="開始日" data-pt="Início">開始日</th><th data-jp="制服" data-pt="Uniforme">制服</th><th data-jp="寮" data-pt="Alojamento">寮</th><th data-jp="担当" data-pt="Responsável">担当</th></tr>
+      <tr><td>KELO55 Carlos Silva</td><td data-jp="A社 (安城市)" data-pt="Empresa A (Anjo)">A社 (安城市)</td><td data-jp="2026/04/01 (例)" data-pt="01/04/2026 (ex.)">2026/04/01 (例)</td><td data-jp="貸出中 M" data-pt="Emprestado, tamanho M">貸出中 M</td><td data-jp="なし" data-pt="Não">なし</td><td data-jp="担当者1 (例)" data-pt="Responsável 1 (ex.)">担当者1 (例)</td></tr>
+      <tr><td>DEMO520 Tran Van Nam</td><td data-jp="D社 (豊橋市)" data-pt="Empresa D (Toyohashi)">D社 (豊橋市)</td><td data-jp="2026/11/02 予定 (例)" data-pt="02/11/2026 previsto (ex.)">2026/11/02 予定 (例)</td><td data-jp="準備中 L" data-pt="Em preparo, tamanho L">準備中 L</td><td data-jp="あり" data-pt="Sim">あり</td><td data-jp="担当者2 (例)" data-pt="Responsável 2 (ex.)">担当者2 (例)</td></tr>
+      <tr><td>DEMO102 Maria Flores</td><td data-jp="紹介中 (未定)" data-pt="Apresentado (a definir)">紹介中 (未定)</td><td>-</td><td>-</td><td data-jp="希望あり" data-pt="Quer alojamento">希望あり</td><td data-jp="担当者1 (例)" data-pt="Responsável 1 (ex.)">担当者1 (例)</td></tr>
+    </table></div>
+  </section>
+
+  <!-- ALERTAS -->
+  <section class="tela" id="tela-alertas">
+    <h2 data-jp="期限アラート" data-pt="Alertas de prazo">期限アラート</h2>
+    <p class="sub" data-jp="在留期限、健康診断、車検と自賠責、免許の更新。期限が近い順に自動で並びます。転記ミスと確認漏れを減らすための画面です。" data-pt="Visto, exame de saúde, shaken e seguro, renovação de habilitação. Ordenado pelo prazo mais próximo. É a tela que evita erro de cópia e esquecimento.">在留期限、健康診断、車検と自賠責、免許の更新。期限が近い順に自動で並びます。転記ミスと確認漏れを減らすための画面です。</p>
+    <div class="alerta a-vermelho"><span><b data-jp="在留期限" data-pt="Visto">在留期限</b> <span data-jp="Carlos Silva まで12日。更新書類の確認が必要です。" data-pt="Carlos Silva: faltam 12 dias. Conferir os documentos da renovação.">Carlos Silva まで12日。更新書類の確認が必要です。</span></span><span class="tag" data-jp="要対応" data-pt="Urgente">要対応</span></div>
+    <div class="alerta a-amarelo"><span><b data-jp="車検" data-pt="Shaken">車検</b> <span data-jp="社用車 3台 が今月中に期限 (自賠責含む)。サンプル。" data-pt="3 carros da empresa vencem este mês (com seguro). Exemplo.">社用車 3台 が今月中に期限 (自賠責含む)。サンプル。</span></span><span class="tag" data-jp="今月中" data-pt="Este mês">今月中</span></div>
+    <div class="alerta a-amarelo"><span><b data-jp="健康診断" data-pt="Exame de saúde">健康診断</b> <span data-jp="未受診 5名 (サンプル)。予約の調整中。" data-pt="5 pendentes (exemplo). Agendamento em andamento.">未受診 5名 (サンプル)。予約の調整中。</span></span><span class="tag" data-jp="確認中" data-pt="Em andamento">確認中</span></div>
+    <div class="alerta a-amarelo"><span><b data-jp="休暇申請" data-pt="Pedido de folga">休暇申請</b> <span data-jp="新しい申請 5件 (サンプル)。派遣先への連絡待ち。" data-pt="5 pedidos novos (exemplo). Aguardando contato com a empresa.">新しい申請 5件 (サンプル)。派遣先への連絡待ち。</span></span><span class="tag" data-jp="対応中" data-pt="Em andamento">対応中</span></div>
+    <div class="alerta a-verde"><span><b data-jp="制服" data-pt="Uniforme">制服</b> <span data-jp="今週の貸出と返却は全て登録済み (サンプル)。" data-pt="Empréstimos e devoluções da semana registrados (exemplo).">今週の貸出と返却は全て登録済み (サンプル)。</span></span><span class="tag" data-jp="完了" data-pt="Ok">完了</span></div>
+  </section>
+
+  
+  <!-- KANBAN -->
+  <section class="tela" id="tela-kanban">
+    <h2 data-jp="カンバン (候補者の進み具合)" data-pt="Kanban (etapa de cada candidato)">カンバン (候補者の進み具合)</h2>
+    <p class="sub" data-jp="カードをドラッグすると、候補者の進み具合をそのまま移せます。営業会議ではこの画面をそのまま使えます。" data-pt="Arrastando o cartão, a etapa do candidato muda na hora. Esta tela serve direto para a reunião de acompanhamento.">カードをドラッグすると、候補者の進み具合をそのまま移せます。営業会議ではこの画面をそのまま使えます。</p>
+    <div class="kanban" id="kanban">
+      <div class="coluna" ondragover="event.preventDefault()" ondrop="soltar(event)"><h4 data-jp="新規" data-pt="Novo">新規</h4><span class="qtd"><span class="qtd-num">2</span></span>
+        <div class="card-k" draggable="true" ondragstart="arrastar(event)" id="k1"><span class="cod">DEMO415</span><b>Lucas Oliveira</b><span data-jp="静岡県 / 交替OK / 寮希望" data-pt="Shizuoka / Turnos / Quer alojamento">静岡県 / 交替OK / 寮希望</span></div>
+        <div class="card-k" draggable="true" ondragstart="arrastar(event)" id="k2"><span class="cod">DEMO601</span><b>Diego Ramos</b><span data-jp="愛知県 / 日勤" data-pt="Aichi / Turno do dia">愛知県 / 日勤</span></div>
+      </div>
+      <div class="coluna" ondragover="event.preventDefault()" ondrop="soltar(event)"><h4 data-jp="面談" data-pt="Entrevista">面談</h4><span class="qtd"><span class="qtd-num">1</span></span>
+        <div class="card-k" draggable="true" ondragstart="arrastar(event)" id="k3"><span class="cod">DEMO311</span><b>Ana Reyes</b><span data-jp="三重県 / 夜勤OK" data-pt="Mie / Turno da noite">三重県 / 夜勤OK</span></div>
+      </div>
+      <div class="coluna" ondragover="event.preventDefault()" ondrop="soltar(event)"><h4 data-jp="紹介中" data-pt="Apresentado">紹介中</h4><span class="qtd"><span class="qtd-num">1</span></span>
+        <div class="card-k" draggable="true" ondragstart="arrastar(event)" id="k4"><span class="cod">DEMO102</span><b>Maria Flores</b><span data-jp="静岡県 / 交替OK" data-pt="Shizuoka / Turnos">静岡県 / 交替OK</span></div>
+      </div>
+      <div class="coluna" ondragover="event.preventDefault()" ondrop="soltar(event)"><h4 data-jp="見学" data-pt="Visita">見学</h4><span class="qtd"><span class="qtd-num">1</span></span>
+        <div class="card-k" draggable="true" ondragstart="arrastar(event)" id="k5"><span class="cod">DEMO207</span><b>Kenji Tanaka</b><span data-jp="愛知県 / 日勤" data-pt="Aichi / Turno do dia">愛知県 / 日勤</span></div>
+      </div>
+      <div class="coluna" ondragover="event.preventDefault()" ondrop="soltar(event)"><h4 data-jp="決定" data-pt="Decidido">決定</h4><span class="qtd"><span class="qtd-num">1</span></span>
+        <div class="card-k" draggable="true" ondragstart="arrastar(event)" id="k6"><span class="cod">DEMO520</span><b>Tran Van Nam</b><span data-jp="愛知県 / 交替OK" data-pt="Aichi / Turnos">愛知県 / 交替OK</span></div>
+      </div>
+    </div>
+  </section>
+
+<p class="rodape" data-jp="デモ版です。実在の人物、企業、求人ではありません。本番では、ログイン、権限、バックアップ、個人情報の保護 (APPIに沿った対策) を入れた上で運用します。サイトの応募フォームと連動し、登録がそのままこの管理画面に入ります。" data-pt="Versão de demonstração. Pessoas, empresas e vagas não são reais. Na versão de produção entram login, permissões, backup e proteção de dados pessoais alinhada à APPI. O formulário do site cai direto neste painel.">デモ版です。実在の人物、企業、求人ではありません。本番では、ログイン、権限、バックアップ、個人情報の保護 (APPIに沿った対策) を入れた上で運用します。サイトの応募フォームと連動し、登録がそのままこの管理画面に入ります。</p>
+</div>
+
+<script>
+function aba(id, botao){
+  document.querySelectorAll('.menu button').forEach(function(b){b.classList.remove('ativo')});
+  botao.classList.add('ativo');
+  document.querySelectorAll('.tela').forEach(function(t){t.classList.remove('ativa')});
+  document.getElementById('tela-'+id).classList.add('ativa');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+var lang='jp';
+function setLang(l){
+  lang=l;
+  document.getElementById('lang-jp').classList.toggle('ativo', l==='jp');
+  document.getElementById('lang-pt').classList.toggle('ativo', l==='pt');
+  document.querySelectorAll('[data-jp]').forEach(function(el){
+    el.textContent = l==='jp' ? el.getAttribute('data-jp') : el.getAttribute('data-pt');
+  });
+  document.documentElement.lang = l==='jp' ? 'ja' : 'pt';
+}
+function filtrarCand(){
+  var q=document.getElementById('busca-cand').value.toLowerCase();
+  var st=document.getElementById('filtro-status').value;
+  document.querySelectorAll('#tab-cand tr').forEach(function(tr,i){
+    if(i===0) return;
+    var txt=tr.textContent.toLowerCase();
+    tr.style.display = (txt.indexOf(q)>=0 && (!st || txt.indexOf(st)>=0)) ? '' : 'none';
+  });
+}
+var seq=600;
+function addCand(e){
+  e.preventDefault();
+  seq++;
+  var nome=document.getElementById('f-nome').value;
+  var nac=document.getElementById('f-nac').value;
+  var area=document.getElementById('f-area').value;
+  var turno=document.getElementById('f-turno').value;
+  var jp=document.getElementById('f-jp').value.replace('日本語: ','');
+  var tab=document.getElementById('tab-cand');
+  var tr=document.createElement('tr');
+  tr.innerHTML='<td>DEMO'+seq+'</td><td>'+nome.replace(/</g,'')+'</td><td>'+nac+'</td><td>'+area+' / '+turno+'</td><td>'+jp+'</td><td>-</td><td><span class="status s-novo" data-jp="新規" data-pt="Novo">新規</span></td>';
+  tab.appendChild(tr);
+  document.getElementById('ok-cand').style.display='block';
+  document.getElementById('form-cand').classList.remove('aberto');
+  document.getElementById('form-cand').reset();
+  return false;
+}
+</script>
+
+<div class="ficha-fundo" id="ficha-fundo" onclick="fecharFicha()">
+  <div class="ficha" onclick="event.stopPropagation()">
+    <button class="fechar" onclick="fecharFicha()" data-jp="閉じる" data-pt="Fechar">閉じる</button>
+    <h3 id="d-nome">Nome</h3>
+    <div class="cod" id="d-cod">CODE</div>
+    <div class="campo"><small data-jp="電話" data-pt="Telefone">電話</small><span id="d-tel">-</span></div>
+    <div class="campo"><small data-jp="国籍" data-pt="Nacionalidade">国籍</small><span id="d-nac">-</span></div>
+    <div class="campo"><small data-jp="希望" data-pt="Preferência">希望</small><span id="d-area">-</span></div>
+    <div class="campo"><small data-jp="日本語" data-pt="Nível de japonês">日本語</small><span id="d-nivel">-</span></div>
+    <div class="campo"><small data-jp="在留期限" data-pt="Visto">在留期限</small><span id="d-visto">-</span></div>
+    <div class="campo"><small data-jp="書類チェック" data-pt="Documentos">書類チェック</small><div id="d-docs"></div></div>
+    <div class="campo"><small data-jp="次のステップ" data-pt="Próximo passo">次のステップ</small><span id="d-prox">-</span></div>
+    <p style="font-size:11px;color:#7a8a83;line-height:1.8" data-jp="連絡先は表示例です。実在の個人情報ではありません。" data-pt="Contatos de exemplo. Não são dados pessoais reais.">連絡先は表示例です。実在の個人情報ではありません。</p>
+  </div>
+</div>
+<script>
+var DETALHES = {
+ 'KELO55':{tel:'090-1111-2222 (例)',nac:{jp:'ブラジル',pt:'Brasil'},area:{jp:'愛知県 / 日勤',pt:'Aichi / Turno do dia'},nivel:{jp:'日常会話',pt:'Conversa do dia a dia'},visto:{jp:'残り12日 (要対応)',pt:'Faltam 12 dias (urgente)'},docs:[1,1,1,0,1],prox:{jp:'在留更新の書類を確認し、派遣先へ連絡する',pt:'Conferir os documentos da renovação do visto e avisar a empresa'}},
+ 'DEMO102':{tel:'090-3333-4444 (例)',nac:{jp:'ペルー',pt:'Peru'},area:{jp:'静岡県 / 交替OK',pt:'Shizuoka / Turnos'},nivel:{jp:'簡単な会話',pt:'Conversa simples'},visto:{jp:'8ヶ月',pt:'8 meses'},docs:[1,1,0,1,0],prox:{jp:'B社へ紹介中。職場見学の日程を調整する',pt:'Apresentada à Empresa B. Agendar a visita ao local'}},
+ 'DEMO207':{tel:'090-5555-6666 (例)',nac:{jp:'日本',pt:'Japão'},area:{jp:'愛知県 / 日勤',pt:'Aichi / Turno do dia'},nivel:{jp:'流暢',pt:'Fluente'},visto:{jp:'対象外',pt:'Não se aplica'},docs:[1,1,1,1,1],prox:{jp:'A社の職場見学を実施する',pt:'Fazer a visita à Empresa A'}},
+ 'DEMO311':{tel:'090-7777-8888 (例)',nac:{jp:'フィリピン',pt:'Filipinas'},area:{jp:'三重県 / 夜勤OK',pt:'Mie / Turno da noite'},nivel:{jp:'日常会話',pt:'Conversa do dia a dia'},visto:{jp:'5ヶ月',pt:'5 meses'},docs:[1,0,1,1,0],prox:{jp:'パスポートのコピーをもらう',pt:'Pedir a cópia do passaporte'}},
+ 'DEMO415':{tel:'090-9999-0000 (例)',nac:{jp:'ブラジル',pt:'Brasil'},area:{jp:'静岡県 / 交替OK / 寮希望',pt:'Shizuoka / Turnos / Quer alojamento'},nivel:{jp:'簡単な会話',pt:'Conversa simples'},visto:{jp:'11ヶ月',pt:'11 meses'},docs:[1,1,0,0,0],prox:{jp:'面談の日程を決める',pt:'Marcar a data da entrevista'}},
+ 'DEMO520':{tel:'090-1212-3434 (例)',nac:{jp:'ベトナム',pt:'Vietnã'},area:{jp:'愛知県 / 交替OK',pt:'Aichi / Turnos'},nivel:{jp:'日常会話',pt:'Conversa do dia a dia'},visto:{jp:'3ヶ月',pt:'3 meses'},docs:[1,1,1,1,1],prox:{jp:'D社で11月2日に開始。制服Lを準備する',pt:'Começa na Empresa D em 2 de novembro. Preparar o uniforme tamanho L'}},
+ 'DEMO601':{tel:'090-2222-3333 (例)',nac:{jp:'ブラジル',pt:'Brasil'},area:{jp:'愛知県 / 日勤',pt:'Aichi / Turno do dia'},nivel:{jp:'簡単な会話',pt:'Conversa simples'},visto:{jp:'6ヶ月',pt:'6 meses'},docs:[1,0,0,0,0],prox:{jp:'面談の日程を決める',pt:'Marcar a data da entrevista'}}
+};
+var DOCS = [['在留カード','Cartão de residência'],['パスポート','Passaporte'],['履歴書','Currículo'],['マイナンバー','My Number'],['健康診断','Exame de saúde']];
+function abrirFicha(cod, nome){
+  var d = DETALHES[cod] || {tel:'-',nac:{jp:'登録直後',pt:'Recém cadastrado'},area:{jp:'未設定',pt:'A definir'},nivel:{jp:'未確認',pt:'A confirmar'},visto:{jp:'未確認',pt:'A confirmar'},docs:[0,0,0,0,0],prox:{jp:'面談の日程を決める',pt:'Marcar a data da entrevista'}};
+  document.getElementById('d-nome').textContent = nome;
+  document.getElementById('d-cod').textContent = cod;
+  document.getElementById('d-tel').textContent = d.tel;
+  document.getElementById('d-nac').textContent = d.nac[lang];
+  document.getElementById('d-area').textContent = d.area[lang];
+  document.getElementById('d-nivel').textContent = d.nivel[lang];
+  document.getElementById('d-visto').textContent = d.visto[lang];
+  document.getElementById('d-prox').textContent = d.prox[lang];
+  var html='';
+  DOCS.forEach(function(doc,i){
+    var ok = d.docs[i];
+    html += '<div class="doc"><span>'+doc[lang==='jp'?0:1]+'</span><span class="'+(ok?'ok-s':'pend')+'">'+(ok?(lang==='jp'?'確認済み':'Conferido'):(lang==='jp'?'未確認':'Pendente'))+'</span></div>';
+  });
+  document.getElementById('d-docs').innerHTML = html;
+  document.getElementById('ficha-fundo').classList.add('aberta');
+}
+function fecharFicha(){ document.getElementById('ficha-fundo').classList.remove('aberta'); }
+var arrastado=null;
+function arrastar(e){ arrastado = e.target; }
+function soltar(e){
+  var col = e.target.closest('.coluna');
+  if(col && arrastado){ col.appendChild(arrastado); contarKanban(); sincronizarStatus(arrastado); }
+}
+var ETAPAS = {'新規':['s-novo','Novo'],'面談':['s-entrevista','Entrevista'],'紹介中':['s-apresentando','Apresentado'],'見学':['s-visita','Visita'],'決定':['s-decidido','Decidido']};
+function sincronizarStatus(card){
+  var cod = card.querySelector('.cod').textContent;
+  var col = card.closest('.coluna'); if(!col) return;
+  var etapaJp = col.querySelector('h4').getAttribute('data-jp');
+  var etapaPt = col.querySelector('h4').getAttribute('data-pt');
+  var info = ETAPAS[etapaJp]; if(!info) return;
+  document.querySelectorAll('#tab-cand tr').forEach(function(tr){
+    var oc = tr.getAttribute('onclick') || '';
+    if(oc.indexOf("'"+cod+"'") >= 0){
+      var chip = tr.querySelector('.status');
+      if(chip){ chip.className = 'status ' + info[0]; chip.setAttribute('data-jp', etapaJp); chip.setAttribute('data-pt', etapaPt); chip.textContent = (lang==='jp' ? etapaJp : etapaPt); }
+    }
+  });
+}
+function moverCartao(btn, dir){
+  var card = btn.closest('.card-k');
+  var cols = Array.prototype.slice.call(document.querySelectorAll('#kanban .coluna'));
+  var alvo = cols.indexOf(card.closest('.coluna')) + dir;
+  if(alvo < 0 || alvo >= cols.length) return;
+  cols[alvo].appendChild(card);
+  contarKanban(); sincronizarStatus(card);
+}
+function enfeitarCartoes(){
+  document.querySelectorAll('.card-k').forEach(function(card){
+    if(card.querySelector('.mover')) return;
+    var sp = document.createElement('span'); sp.className = 'mover';
+    sp.innerHTML = '<button type="button" onclick="moverCartao(this,-1)">‹</button><button type="button" onclick="moverCartao(this,1)">›</button>';
+    card.appendChild(sp);
+  });
+}
+enfeitarCartoes();
+function contarKanban(){
+  document.querySelectorAll('#kanban .coluna').forEach(function(col){
+    col.querySelector('.qtd-num').textContent = col.querySelectorAll('.card-k').length;
+  });
+}
+</script>
+<div id="toast"></div>
+
+<script>
+function mostrarToast(jp, pt){
+  var t = document.getElementById('toast');
+  t.textContent = lang==='jp' ? jp : pt;
+  t.classList.add('mostra');
+  setTimeout(function(){ t.classList.remove('mostra'); }, 3400);
+}
+function togglePub(btn){
+  var off = btn.classList.toggle('off');
+  btn.setAttribute('data-jp', off ? 'サイト非公開' : 'サイト公開中');
+  btn.setAttribute('data-pt', off ? 'Fora do site' : 'Publicado no site');
+  btn.textContent = lang==='jp' ? btn.getAttribute('data-jp') : btn.getAttribute('data-pt');
+  mostrarToast(off ? 'サイトから下げました (デモ)' : 'サイトに公開しました (デモ)', off ? 'A vaga saiu do site (demo)' : 'A vaga foi publicada no site (demo)');
+}
+function buscarGlobal(){
+  var q = document.getElementById('busca-global').value;
+  document.querySelector('[data-tela="cand"]').click();
+  document.getElementById('busca-cand').value = q;
+  filtrarCand();
+}
+var simNomes = ['Rafael Costa','Juliana Mendes','Pedro Santos'];
+var simSeq = 700, simIdx = 0;
+function simularAplicacao(){
+  if(simIdx >= simNomes.length){ mostrarToast('デモのシミュレーションはここまでです', 'A simulação da demo vai até aqui'); return; }
+  var nome = simNomes[simIdx++]; simSeq++;
+  var cod = 'DEMO' + simSeq;
+  var tab = document.getElementById('tab-cand');
+  var tr = document.createElement('tr');
+  tr.className = 'clicavel';
+  tr.setAttribute('onclick', "abrirFicha('"+cod+"','"+nome+"')");
+  tr.innerHTML = '<td>'+cod+'</td><td>'+nome+'</td><td data-jp="ブラジル / ポルトガル語" data-pt="Brasil / Português">ブラジル / ポルトガル語</td><td data-jp="静岡県 / 交替OK" data-pt="Shizuoka / Turnos">静岡県 / 交替OK</td><td data-jp="日常会話" data-pt="Conversa do dia a dia">日常会話</td><td>-</td><td><span class="status s-novo" data-jp="新規" data-pt="Novo">新規</span></td><td data-jp="サイト" data-pt="Site">サイト</td>';
+  tab.appendChild(tr);
+  if(lang==='pt'){ setLang('pt'); }
+  var col = document.querySelector('#kanban .coluna');
+  var card = document.createElement('div');
+  card.className = 'card-k'; card.draggable = true; card.id = 'ks'+simSeq;
+  card.setAttribute('ondragstart','arrastar(event)');
+  card.innerHTML = '<span class="cod">'+cod+'</span><b>'+nome+'</b><span>'+(lang==='jp' ? '静岡県 / 交替OK' : 'Shizuoka / Turnos')+'</span>';
+  col.appendChild(card);
+  enfeitarCartoes();
+  contarKanban();
+  var feed = document.getElementById('feed');
+  var item = document.createElement('div');
+  item.className = 'feed-item';
+  item.innerHTML = '<span>'+(lang==='jp' ? 'サイトから応募: '+nome : 'Inscrição pelo site: '+nome)+'</span><span class="tempo">'+(lang==='jp' ? 'たった今' : 'Agora')+'</span>';
+  feed.insertBefore(item, feed.firstChild);
+  var kpi = document.getElementById('kpi-cand');
+  kpi.textContent = parseInt(kpi.textContent) + 1;
+  mostrarToast('サイトから新しい応募が入りました: '+nome, 'Nova inscrição pelo site: '+nome);
+}
+</script>
+</body>
+</html>
