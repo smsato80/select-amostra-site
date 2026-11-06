@@ -173,6 +173,25 @@
 .aplicar{margin-top:12px;background:#fff;border:1.5px solid #29a279;color:#0d4a36;padding:10px 14px;font-weight:700;cursor:pointer;font-size:13px;width:100%}
 .aplicar:hover{background:#29a279;color:#fff}
 </style>
+
+<style>
+/* Correcoes mobile 06/11/2026: cabecalho, menu, overflow PT, ancoras */
+#btn-menu{white-space:nowrap;flex:none}
+.idioma-btn{flex:none}
+[id^="a-"]{scroll-margin-top:126px}
+@media(max-width:860px){
+ .topo{flex-wrap:wrap;gap:10px 12px;padding:10px 14px}
+ .topo img.logo{height:38px}
+ .tel-topo{margin-left:auto;font-size:15px}
+ nav.menu.aberta{top:calc(100% + 1px);left:12px;right:12px}
+ .hero .micro{font-size:12.5px;letter-spacing:.1em;word-break:keep-all}
+ .hero h1{word-break:keep-all}
+ .hero .dentro{padding-bottom:88px}
+ .tel-fixo{right:12px;bottom:12px}
+ .tel-fixo a{padding:12px 16px;font-size:13px}
+ .rodape-apresentacao{padding-bottom:92px}
+}
+</style>
 </head>
 <body>
 <div id="progresso"></div>
@@ -402,7 +421,7 @@
 
 <!-- ============ PAINEL RESUMO ============ -->
 <section class="amostra" id="amostra-c">
-  <div class="painel-topo"><b data-jp="管理システム案 (概要)" data-pt="Sistema de gestão (resumo)">管理システム案 (概要)</b><span style="font-size:12px" data-jp="データは全て架空のサンプルです。詳細は別ファイルのミニCRMデモにあります。" data-pt="Dados fictícios. Os detalhes estão no arquivo do mini CRM.">データは全て架空のサンプルです。詳細は別ファイルのミニCRMデモにあります。</span></div>
+  <div class="painel-topo"><b data-jp="管理システム案 (概要)" data-pt="Sistema de gestão (resumo)">管理システム案 (概要)</b><span style="font-size:12px" data-jp="データは全て架空のサンプルです。詳しいデモは、ご希望があれば別途ご覧いただけます。" data-pt="Dados fictícios. A demonstração completa pode ser vista separadamente, se houver interesse.">データは全て架空のサンプルです。詳しいデモは、ご希望があれば別途ご覧いただけます。</span></div>
   <div class="secao">
     <div class="kpis">
       <div class="kpi"><b>5<span data-jp="件" data-pt="">件</span></b><span data-jp="30日以内の期限アラート (例)" data-pt="Alertas de prazo em 30 dias (exemplo)">30日以内の期限アラート (例)</span></div>
@@ -415,11 +434,11 @@
     <div class="alerta atencao"><span data-jp="車検: 社用車3台が今月中に期限 (自賠責を含む)" data-pt="Shaken: 3 carros vencem neste mês, com o seguro obrigatório">車検: 社用車3台が今月中に期限 (自賠責を含む)</span><span class="tag" data-jp="今月中" data-pt="Este mês">今月中</span></div>
     <div class="alerta atencao"><span data-jp="健康診断: 未受診5名" data-pt="Exame de saúde: 5 pessoas pendentes">健康診断: 未受診5名</span><span class="tag" data-jp="確認中" data-pt="Em verificação">確認中</span></div>
     <div class="alerta"><span data-jp="制服: 今週の貸出と返却は登録済み" data-pt="Uniformes: empréstimos e devoluções da semana registrados">制服: 今週の貸出と返却は登録済み</span><span class="tag" data-jp="完了" data-pt="Concluído">完了</span></div>
-    <p class="sub" style="margin-top:22px" data-jp="この画面は概要です。候補者の登録、求人、派遣先企業、就業中の管理まで入れたデモは、別ファイル「select-mini-crm.html」にあります。導入はサイトの後、必要性を確認してから進める想定です。" data-pt="Esta tela é o resumo. A demonstração completa, com cadastro de candidatos, vagas, empresas e quem está trabalhando, está no arquivo select-mini-crm.html. A implantação viria depois do site, confirmada a necessidade.">この画面は概要です。候補者の登録、求人、派遣先企業、就業中の管理まで入れたデモは、別ファイル「select-mini-crm.html」にあります。導入はサイトの後、必要性を確認してから進める想定です。</p>
+    <p class="sub" style="margin-top:22px" data-jp="この画面は概要です。候補者の登録、求人、派遣先企業、就業中の管理まで入れた詳しいデモも用意しています。導入はサイトの後、必要性を確認してから進める想定です。" data-pt="Esta tela é o resumo. Existe também uma demonstração completa, com cadastro de candidatos, vagas, empresas e quem está trabalhando. A implantação viria depois do site, confirmada a necessidade.">この画面は概要です。候補者の登録、求人、派遣先企業、就業中の管理まで入れた詳しいデモも用意しています。導入はサイトの後、必要性を確認してから進める想定です。</p>
   </div>
 </section>
 
-<p class="rodape-apresentacao" data-jp="SatoTech (Minoru Sato) が 2026年10月28日に作成した提案用サンプル v6。ロゴのみ公式のものを使用し、改変していません。写真はサンプル用に作成したモデル画像です。" data-pt="Amostra v8 preparada pela SatoTech (Minoru Sato) em 28/10/2026. Só a logo é oficial e não foi alterada. As fotos são imagens de modelo criadas para a amostra.">SatoTech (Minoru Sato) が 2026年10月28日に作成した提案用サンプル v6。ロゴのみ公式のものを使用し、改変していません。写真はサンプル用に作成したモデル画像です。</p>
+<p class="rodape-apresentacao" data-jp="SatoTech (Minoru Sato) が 2026年10月28日に作成した提案用サンプル v8。ロゴのみ公式のものを使用し、改変していません。写真はサンプル用に作成したモデル画像です。" data-pt="Amostra v8 preparada pela SatoTech (Minoru Sato) em 28/10/2026. Só a logo é oficial e não foi alterada. As fotos são imagens de modelo criadas para a amostra.">SatoTech (Minoru Sato) が 2026年10月28日に作成した提案用サンプル v8。ロゴのみ公式のものを使用し、改変していません。写真はサンプル用に作成したモデル画像です。</p>
 
 <script>
 function mostrar(id){
